@@ -231,6 +231,11 @@ describe('Unit', function () {
       const u = new Unit(math.fraction(5), 'cm')
       assert.strictEqual(u.toNumber('mm'), 50)
     })
+
+    it('should convert a unit with value only to a number', function () {
+      const u = Unit.parse('5', { allowNoUnits: true })
+      assert.strictEqual(u.toNumber(), 5)
+    })
   })
 
   describe('toNumeric', function () {
@@ -347,6 +352,11 @@ describe('Unit', function () {
       assert.strictEqual(u4.units[1].unit.name, 's')
       assert.strictEqual(u4.units[0].prefix.name, 'c')
       assert.strictEqual(u4.fixPrefix, true)
+    })
+
+    it('should convert a unitless quantity', function () {
+      const u = Unit.parse('5', { allowNoUnits: true })
+      assert.strictEqual(u.toNumeric(), 5)
     })
 
     it('should convert a binary prefixes (1)', function () {
@@ -1163,6 +1173,16 @@ describe('Unit', function () {
       Unit.createUnitSingle('jabberwocky', '1 mile^5/hour')
       assert.strictEqual('jabberwocky_STUFF' in Unit.BASE_UNITS, true)
       assert.strictEqual(math.evaluate('4 mile^5/minute').format(4), '240 jabberwocky')
+    })
+
+    it('should use baseName', function () {
+      Unit.createUnitSingle('truck', { baseName: 'VEHICLE' })
+      Unit.createUnitSingle('speedy', { definition: '1 truck/day', baseName: 'VEHICLE_PRODUCTION_RATE' })
+      assert('VEHICLE' in Unit.BASE_UNITS)
+      assert('VEHICLE_PRODUCTION_RATE' in Unit.BASE_UNITS)
+      assert(new Unit(1, 'truck').hasBase('VEHICLE'))
+      assert(new Unit(1, 'truck/day').hasBase('VEHICLE_PRODUCTION_RATE'))
+      assert.strictEqual(math.evaluate('10 truck/hr').format(4), '240 speedy')
     })
   })
 
